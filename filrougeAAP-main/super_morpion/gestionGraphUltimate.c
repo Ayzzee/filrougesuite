@@ -30,9 +30,9 @@ void writeMorpionUltimate(posGraphUltimate positionU){
 
         posGraph position = positionU.morpion[i];
 
-        if(isNodeTerminal(position)==1){    //Si la position est gagnante, on rempli le morpion de la couleur
+        if(toTab(positionU.morpion[9].pos)[i] !='.'){    //Si la position est gagnante, on rempli le morpion de la couleur
 
-            if(position.joueur == 'o') strcpy(couleur,"white");  // Le joueur 'o' correspond à couleur blanche
+            if(toTab(positionU.morpion[9].pos)[i] == 'o') strcpy(couleur,"white");  // Le joueur 'o' correspond à couleur blanche
             else strcpy(couleur, "black");   // Le joueur 'x' correspond à couleur noire
 
             fprintf(file, "<TD bgcolor=\"black\">\n");

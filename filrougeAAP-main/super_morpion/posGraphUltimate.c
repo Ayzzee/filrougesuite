@@ -52,11 +52,11 @@ int CoupOpti(posGraph position, int parentID, int moveID, int isJoueurAuTrait, i
 
                 if (parentID == -1) {
                     // On appelle récursivement la fonction avec la nouvelle position
-                    val = ponderation * max(val, -CoupOpti(newPosition, 0, nombreDeNoeudUlt, 1 - isJoueurAuTrait, coupopti, evaluation,ponderation));
+                    val = max(val, -CoupOpti(newPosition, 0, nombreDeNoeudUlt, 1 - isJoueurAuTrait, coupopti, evaluation,ponderation));
                     coupopti[i] = i;
                     evaluation[i] = val;
                 } else {
-                    val = ponderation * max(val, -CoupOpti(newPosition, moveID, nombreDeNoeudUlt, 1 - isJoueurAuTrait, coupopti, evaluation,ponderation));
+                    val = max(val, -CoupOpti(newPosition, moveID, nombreDeNoeudUlt, 1 - isJoueurAuTrait, coupopti, evaluation,ponderation));
                 }
             }
             if (parentID == -1 && (positionConvert[i] == 'o' || positionConvert[i] == 'x')) {

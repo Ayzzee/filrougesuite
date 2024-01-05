@@ -22,13 +22,15 @@ void GameUltimate(posGraphUltimate position){
     char* dernier_coup = calloc(10,sizeof(char));
     while(isNodeTerminal(position.morpion[9]) !=1){
         writeMorpionUltimate(position);
-        position = TourUltimate(position,&dernier_coup);
-        position.joueur = 'x';
         position = TourUltimateBot(position,&dernier_coup);
+        position.joueur = (position.joueur == 'o' ? 'x' : 'o');
+        position = TourUltimateBot(position,&dernier_coup);
+        position.joueur = (position.joueur == 'o' ? 'x' : 'o');
         printf("Voici le morpion principal : \n");
         showTable(position.morpion[9]);
     }
-    printf("Bravo, la partie est finie et c'est : le %s qui a perdu...\n",position.joueur == 'o'? "joueur" : "bot");
+    writeMorpionUltimate(position);
+    printf("Bravo, la partie est finie\n");
 }
 
 posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_coup[]) {
@@ -50,9 +52,9 @@ posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_
     }
     maximum = -INFINI;
     int coup_a_jouer[2];
-    printf("/////////////////////////////////////////////// \n Grille n° %d :\n", grille);
-    showTable(position.morpion[grille - 1]);
-    evaluation(position, grille, 3, 1, coup_a_jouer);
+    char joueur_temp = position.joueur;
+    evaluation(position, grille, 4, 1, coup_a_jouer,1);
+    position.joueur = joueur_temp;
     printf("\nCoup joué par le bot: %d\n", coup_a_jouer[0]);
     strcpy(position.morpion[grille - 1].pos, TourAuto(position.morpion[grille - 1].pos, intToCoup(coup_a_jouer[0] + 1), position.joueur));
 
@@ -66,9 +68,6 @@ posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_
         free(positionConvert);
     }
 
-    if (position.joueur == 'o') position.joueur = 'x';
-    else position.joueur = 'o';   // On échange de joueur
-
     for (int i = 0; i < 9; i++) {
         printf("///------%d-------///\n", i + 1);
         showTable(position.morpion[i]);
@@ -76,20 +75,21 @@ posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_
     return position;
 }
 
-int evaluation(posGraphUltimate position, int coup_precedent, int horizon, int iterator, int coup_a_jouer[]) {
+int evaluation(posGraphUltimate position, int coup_precedent, int horizon, int iterator, int coup_a_jouer[], int Joueurautrait) {
     int temp = -INFINI;
     int coupSave[9]={0};
     int evaluationSave[9]= {0};
-    int coupSaveBigMorpion[9]={0};
-    int evaluationSaveBigMorpion[9]={0};
     int maxi = -INFINI;
+    if(iterator !=1){
+        position.joueur = (position.joueur == 'x') ? 'o' : 'x';
+    }
     
     if (iterator == horizon ) {
-        CoupOpti(position.morpion[coup_precedent - 1], -1, 0, 0, coupSave, evaluationSave,0.9);
+        CoupOpti(position.morpion[coup_precedent - 1], -1, 0, Joueurautrait, coupSave, evaluationSave,0.9);
         int aux = -INFINI;
         for (int k = 0; k < 9; k++) {
             printf("eval : %d   | coup : %d\n",evaluationSave[k],coupSave[k]);
-            if (evaluationSave[k] > aux && coupSave[k] != -100) { // == -100 signifie que le coup est deja pris
+            if (evaluationSave[k] > aux && coupSave[k] != -100) { // == -100 signifie que le coup est deja pri
                 coup_a_jouer[iterator - 1] = coupSave[k];
                 aux = evaluationSave[k];
             }
@@ -100,33 +100,22 @@ int evaluation(posGraphUltimate position, int coup_precedent, int horizon, int i
     //if(coup_precedent==9) return -INFINI;
     else {
         int m = -INFINI;
-        position.joueur = (position.joueur == 'x') ? 'o' : 'x';
-        int i_max = 0;
+        int i_max = -INFINI;
         char grille_saved_temp[9];
         strcpy(grille_saved_temp, position.morpion[coup_precedent - 1].pos);
         showTable(position.morpion[coup_precedent - 1]);
+        CoupOpti(position.morpion[coup_precedent - 1], -1, 0, Joueurautrait, coupSave, evaluationSave,0.9);
         for (int j = 0; j < 9; j++) {
-            printf("Avant\n");
-            showTable(position.morpion[j]);
-            strcpy(position.morpion[j].pos, TourAuto(position.morpion[j].pos, intToCoup(j + 1), position.joueur));
-            printf("Après\n");
-            showTable(position.morpion[j]);
-            m = evaluation(position, j + 1, horizon, iterator+1, coup_a_jouer);
-            CoupOpti(position.morpion[coup_precedent - 1], -1, 0, 0, coupSave, evaluationSave,0.9);
-            CoupOpti(position.morpion[9], -1, 0, 0, coupSaveBigMorpion, evaluationSaveBigMorpion,0.25);
-            int aux2 = -INFINI;
-            int m_coup;
-                
-            for (int k = 0; k < 9; k++) {
-                if (evaluationSave[k] > aux2  && coupSave[k] != -100) {
-                    m_coup = coupSave[k] ;
-                    aux2 = evaluationSave[k];
-                }
-            }
+            //printf("Avant\n");
+            //showTable(position.morpion[coup_precedent-1]);
+            strcpy(position.morpion[coup_precedent-1].pos, TourAuto(position.morpion[coup_precedent-1].pos, intToCoup(j + 1), position.joueur));
+            //printf("Après\n");
+            //showTable(position.morpion[coup_precedent-1]);
+            m = evaluation(position, j + 1, horizon, iterator+1, coup_a_jouer,1-Joueurautrait);
             printf("\n j: %d, eval: %d, m: %d, maxi: %d ", j,  evaluationSave[j], m, maxi);
             int old_maxi = maxi;
-            maxi = max(maxi, m + evaluationSave[j]+evaluationSaveBigMorpion[j]);
-            if (maxi > old_maxi) {
+            maxi = max(maxi, m + evaluationSave[j]);
+            if (maxi > old_maxi && coupSave[j] != -100) {
                 i_max = j;
                 old_maxi = maxi;
             }
@@ -135,8 +124,7 @@ int evaluation(posGraphUltimate position, int coup_precedent, int horizon, int i
         }
         printf("\nFIN  : Grille n° : %d Joueur : %c, Coup à jouer: %d, iterator:%d _______\n", coup_precedent,position.joueur,i_max,iterator);
             //printf("\n__________________________________________\n");
-        if (position.joueur == 'o') coup_a_jouer[iterator - 1] = i_max;
-            
+        if (iterator == 1) coup_a_jouer[0] = i_max;            
         return maxi;
     }
 }
@@ -168,9 +156,6 @@ posGraphUltimate TourUltimate(posGraphUltimate position,char* pointeur_last_coup
                 strcpy(position.morpion[9].pos,toPosGraph(positionConvert));
                 free(positionConvert);
             }
-
-            if(position.joueur == 'o') position.joueur = 'x';
-            else position.joueur = 'o';   // On échange de joueur
 
             for(int i=0; i<9;i++){
                 printf("///*****%d*******///\n",i+1);
@@ -210,9 +195,6 @@ posGraphUltimate TourUltimate(posGraphUltimate position,char* pointeur_last_coup
                 strcpy(position.morpion[9].pos,toPosGraph(positionConvert));
                 free(positionConvert);
             }
-
-            if(position.joueur == 'o') position.joueur = 'x';
-            else position.joueur = 'o';   // On échange de joueur
 
             for(int i=0; i<9;i++){
                 printf("///*****%d*******///\n",i+1);

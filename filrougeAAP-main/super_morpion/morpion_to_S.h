@@ -13,6 +13,6 @@
 void GameUltimate(posGraphUltimate position);
 posGraphUltimate TourUltimate(posGraphUltimate position, char* last_coup[]);
 posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_coup[]);
-int evaluation(posGraphUltimate position,int coup_precedent, int horizon,int iterator, int coup_a_jouer[]);
+int evaluation(posGraphUltimate position,int coup_precedent, int horizon,int iterator, int coup_a_jouer[], int Joueurautrait);
 
 #endif
