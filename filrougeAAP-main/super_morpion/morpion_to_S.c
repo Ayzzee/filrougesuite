@@ -22,7 +22,7 @@ void GameUltimate(posGraphUltimate position){
     char* dernier_coup = calloc(10,sizeof(char));
     while(isNodeTerminal(position.morpion[9]) !=1){
         writeMorpionUltimate(position);
-        position = TourUltimateBot(position,&dernier_coup);
+        position = TourUltimate(position,&dernier_coup);
         position.joueur = (position.joueur == 'o' ? 'x' : 'o');
         position = TourUltimateBot(position,&dernier_coup);
         position.joueur = (position.joueur == 'o' ? 'x' : 'o');
@@ -53,7 +53,7 @@ posGraphUltimate TourUltimateBot(posGraphUltimate position, char* pointeur_last_
     maximum = -INFINI;
     int coup_a_jouer[2];
     char joueur_temp = position.joueur;
-    evaluation(position, grille, 4, 1, coup_a_jouer,1);
+    evaluation(position, grille, 2, 1, coup_a_jouer,1);
     position.joueur = joueur_temp;
     printf("\nCoup joué par le bot: %d\n", coup_a_jouer[0]);
     strcpy(position.morpion[grille - 1].pos, TourAuto(position.morpion[grille - 1].pos, intToCoup(coup_a_jouer[0] + 1), position.joueur));
